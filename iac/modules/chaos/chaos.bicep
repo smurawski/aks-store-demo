@@ -64,7 +64,7 @@ resource chaosaksexperiment 'Microsoft.Chaos/experiments@2022-10-01-preview' = {
                 parameters: [
                   {
                     key: 'jsonSpec'
-                    value: '{\'action\':\'pod-failure\',\'mode\':\'all\',\'duration\':\'3s\',\'selector\':{\'namespaces\':[\'default\'],\'labelSelectors\':{\'app\':\'contoso-traders-products\'}}}'
+                    value: loadTextContent('fault.json')
                   }
                 ]
               }
@@ -73,5 +73,22 @@ resource chaosaksexperiment 'Microsoft.Chaos/experiments@2022-10-01-preview' = {
         ]
       }
     ]
+  }
+}
+
+resource aks_roledefinitionforchaosexp 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  scope: aks
+  // This is the Azure Kubernetes Service Cluster Admin Role
+  // See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#azure-kubernetes-service-cluster-admin-role
+  name: '0ab0b1a8-8aac-4efd-b8c2-3ee1fb270be8'
+}
+
+resource aks_roleassignmentforchaosexp 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: aks
+  name: guid(aks.id, chaosaksexperiment.id, aks_roledefinitionforchaosexp.id)
+  properties: {
+    roleDefinitionId: aks_roledefinitionforchaosexp.id
+    principalId: chaosaksexperiment.identity.principalId
+    principalType: 'ServicePrincipal'
   }
 }

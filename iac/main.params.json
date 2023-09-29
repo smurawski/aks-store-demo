@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "rgName": {
+      "value": ""
+    },
+    "location": {
+      "value": ""
+    },
+    "service_account_namespace": {
+      "value": "default"
+    },
+    "service_account_name": {
+      "value": "workload-identity-sa"
+    },
+    "prefixHyphenated": {
+      "value": "aks-store"
+    },
+    "includeAcr": {
+      "value": false
+    },
+    "includeChaosTesting": {
+      "value": false
+    },
+    "includeLoadTesting": {
+      "value": false
+    },
+    "includeWorkloadIdentity": {
+      "value": false
+    },
+    "includeOpenAI": {
+      "value": false
+    },
+    "modelVersion": {
+      "value": "0613"
+    },
+    "deployModel": {
+      "value": false
+    }
+  }
+}

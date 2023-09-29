@@ -137,3 +137,6 @@ __pycache__/
 **/.DS_Store
 .vscode
 **/.vscode
+test-results/
+playwright-report/
+playwright/.cache/

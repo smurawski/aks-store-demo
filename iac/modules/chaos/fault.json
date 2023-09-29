@@ -1,0 +1,13 @@
+{
+    "action": "pod-failure",
+    "mode": "one",
+    "duration": "30s",
+    "selector": {
+        "namespaces": [
+            "default"
+        ],
+        "labelSelectors": {
+            "app": "product-service"
+        }
+    }
+}

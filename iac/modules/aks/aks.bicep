@@ -33,8 +33,8 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2023-05-02-previ
         count: 2
         vmSize: 'Standard_D4s_v3'
         mode: 'System'
-        maxCount: 5
-        minCount: 2
+        maxCount: 10
+        minCount: 3
         osType: 'Linux'
         osSKU: 'Ubuntu'
         enableAutoScaling:true

@@ -8,7 +8,7 @@ resource azidentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31
 }
 
 resource federatedCredential 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31' = {
-  name: 'string'
+  name: 'fed${identity_name}'
   parent: azidentity
   properties: {
     audiences: [
@@ -18,3 +18,5 @@ resource federatedCredential 'Microsoft.ManagedIdentity/userAssignedIdentities/f
     subject: 'system:serviceaccount:${service_account_namespace}:${service_account_name}'
   }
 }
+
+output name string = federatedCredential.name
