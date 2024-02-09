@@ -1,0 +1,7 @@
+testName: aks-store-admin
+testPlan: AKS-Store-Admin.jmx
+description:
+engineInstances: 1
+failureCriteria:
+  - avg(response_time_ms) > 5000
+  - percentage(error) > 20
