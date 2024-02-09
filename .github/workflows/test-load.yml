@@ -1,0 +1,95 @@
+name: Load Tests
+
+on:
+  workflow_call:
+    inputs:
+      storeAdminIp:
+        required: true
+        type: string
+      storeFrontIp:
+        required: true
+        type: string
+      resourceGroupName:
+        required: true
+        type: string
+      deploymentName:
+        required: true
+        type: string
+      environmentName:
+        required: true
+        type: string
+      runLoadTest:
+        required: true
+        type: boolean
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  load-tests:
+    if: inputs.runLoadTest
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - uses: azure/login@v1
+        name: Sign in to Azure
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Get Load Test Service
+        id: get_load_test_service
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            loadtestName=$(az deployment group show -g ${{ inputs.resourceGroupName }} -n ${{ inputs.deploymentName }} --query properties.outputs.loadtestName.value -o tsv)
+            echo "LOADTEST_NAME=${loadtestName}"
+            echo "LOADTEST_NAME=${loadtestName}" >> "$GITHUB_OUTPUT"
+      - name: load test
+        uses: Azure/load-testing@v1.1.19
+        with:
+          # Path of the YAML file. Should be fully qualified path or relative to the default working directory
+          loadtestConfigFile: ./loadtests/AKS-Store-Admin.yml
+          loadtestResource: ${{ steps.get_load_test_service.outputs.LOADTEST_NAME }}
+          resourceGroup: ${{ inputs.resourceGroupName }}
+          loadTestRunName: ${{ inputs.environmentName }}${{ github.run_number }}
+          env: |
+            [
+              {
+                "name": "domain",
+                "value": "${{ inputs.storeAdminIp }}"
+              },
+              {
+                "name": "protocol",
+                "value": "http"
+              },
+              {
+                "name": "threads_per_engine",
+                "value": "5"
+              },
+              {
+                "name": "ramp_up_time",
+                "value": "10"
+              },
+              {
+                "name": "duration_in_seconds",
+                "value": "120"
+              },
+              {
+                "name": "number_of_products",
+                "value": "10"
+              },
+              {
+                "name": "number_of_orders",
+                "value": "5"
+              }
+            ]

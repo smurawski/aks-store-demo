@@ -1,0 +1,138 @@
+name: Test Matrix
+
+on:
+  workflow_call:
+    inputs:
+      resourceGroupName:
+        required: true
+        type: string
+      location: 
+        required: true
+        type: string
+      deploymentName:
+        required: true
+        type: string
+      environmentName:
+        required: true
+        type: string
+      chaosEnabled:
+        required: true
+        type: boolean
+      runLoadTest:
+        required: true
+        type: boolean
+      runPlaywrightTests:
+        required: true
+        type: boolean
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  setup_enviroment:
+    uses: ./.github/workflows/test-setup-environment.yml
+    with:
+      resourceGroupName: ${{ inputs.resourceGroupName }}
+      environmentName: ${{ inputs.environmentName }}
+      deploymentName: ${{ inputs.deploymentName }}
+      chaosEnabled: ${{ inputs.chaosEnabled }}
+      location: ${{ inputs.location }}
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  
+  chaos_experiment:
+    uses: ./.github/workflows/test-chaos.yml
+    needs: setup_enviroment
+    with:
+      resourceGroupName: ${{ inputs.resourceGroupName }}${{ inputs.environmentName }}${{ github.run_number }}
+      deploymentName: ${{ inputs.environmentName }}
+      chaosEnabled: ${{ inputs.chaosEnabled }}
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  get_aks_store_public_endpoints:
+    if: always()
+    needs: [setup_enviroment, chaos_experiment]
+    runs-on: ubuntu-22.04
+    outputs:
+      storeAdminIp: ${{ steps.kubectl_get_service.outputs.STORE_ADMIN_IP }}
+      storeFrontIp: ${{ steps.kubectl_get_service.outputs.STORE_FRONT_IP }}
+    steps:
+      - name: Check if Azure Deployment Failed
+        if: ${{ needs.setup_enviroment.result == 'failure' }}
+        run: exit 1
+      - uses: azure/login@v1
+        name: Sign in to Azure
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - run: |
+          rg=${{ inputs.resourceGroupName }}${{ inputs.environmentName }}${{ github.run_number }}
+          aksName=$(az deployment group show -g $rg -n ${{ inputs.environmentName }} --query properties.outputs.aksName.value -o tsv)
+          az aks get-credentials --resource-group $rg --name $aksName
+          storeAdminIp=$(kubectl get service store-admin -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          echo "STORE_ADMIN_IP=${storeAdminIp}"
+          echo "STORE_ADMIN_IP=${storeAdminIp}" >> "$GITHUB_OUTPUT"
+          storeFrontIp=$(kubectl get service store-front -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          echo "STORE_FRONT_IP=${storeFrontIp}"
+          echo "STORE_FRONT_IP=${storeFrontIp}" >> "$GITHUB_OUTPUT"
+        shell: bash
+        id: kubectl_get_service
+        name: Get AKS Store Public Endpoints
+
+  loadtest:
+    if: always()
+    uses: ./.github/workflows/test-load.yml
+    needs: get_aks_store_public_endpoints
+    with:
+      storeAdminIp: ${{ needs.get_aks_store_public_endpoints.outputs.storeAdminIp }}
+      storeFrontIp: ${{ needs.get_aks_store_public_endpoints.outputs.storeFrontIp }}
+      resourceGroupName: ${{ inputs.resourceGroupName }}
+      deploymentName: ${{ inputs.deploymentName }}
+      environmentName: ${{ inputs.environmentName }}
+      runLoadTest: ${{ inputs.runLoadTest }}
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  playwright_tests:
+    if: always()
+    uses: ./.github/workflows/test-playwright.yml
+    needs: get_aks_store_public_endpoints
+    with:
+      testName: ${{ inputs.environmentName }}
+      runPlaywrightTests: ${{ inputs.runPlaywrightTests }}
+      storeAdminUrl: http://${{ needs.get_aks_store_public_endpoints.outputs.storeAdminIp }}
+      storeFrontUrl: http://${{ needs.get_aks_store_public_endpoints.outputs.storeFrontIp }}
+  
+  teardown_environment:
+    runs-on: ubuntu-latest
+    needs: [loadtest, playwright_tests]
+    if: always()
+    steps:
+      - uses: azure/login@v1
+        name: Sign in to Azure
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - run: |
+          az group delete --name ${{ inputs.resourceGroupName }}${{ inputs.environmentName }}${{ github.run_number }} --yes --no-wait
+        shell: bash
+        name: Delete Resource Group
+
+      

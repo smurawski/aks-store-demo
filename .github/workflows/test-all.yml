@@ -1,0 +1,31 @@
+name: Run Load and Playwright Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  run_tests:
+    uses: ./.github/workflows/test-matrix.yml
+    strategy:
+      matrix:
+        environment: [normal, chaos]
+        test: [load, playwright]
+    with:
+      resourceGroupName: ${{ vars.RESOURCE_GROUP_NAME }}
+      deploymentName: ${{ vars.DEPLOYMENT_NAME }}
+      environmentName: ${{ matrix.environment }}${{ matrix.test }}
+      location: ${{ vars.LOCATION }}
+      chaosEnabled: ${{ matrix.environment == 'chaos' }}
+      runLoadTest: ${{ matrix.test == 'load' }}
+      runPlaywrightTests: ${{ matrix.test == 'playwright' }}
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
