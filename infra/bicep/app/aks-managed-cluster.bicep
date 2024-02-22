@@ -55,6 +55,8 @@ param systemPoolConfig object
 @description('The DNS prefix to associate with the AKS cluster')
 param dnsPrefix string = ''
 
+param useWorkloadIdentity bool = false
+
 resource aks 'Microsoft.ContainerService/managedClusters@2023-03-02-preview' = {
   name: name
   location: location
@@ -86,11 +88,15 @@ resource aks 'Microsoft.ContainerService/managedClusters@2023-03-02-preview' = {
     addonProfiles: addOns
     securityProfile:{
       workloadIdentity: {
-        enabled: true
+        enabled: useWorkloadIdentity
       }
     }
     oidcIssuerProfile: {
       enabled: true
+    }
+    autoUpgradeProfile: {
+      upgradeChannel: 'stable'
+      nodeOSUpgradeChannel: 'NodeImage'
     }
   }
 }
