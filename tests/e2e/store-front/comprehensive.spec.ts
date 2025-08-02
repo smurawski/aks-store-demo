@@ -38,11 +38,11 @@ test.describe('Comprehensive Store Front Tests', () => {
 
   test.describe('Product Display and Functionality', () => {
     test('should display product list on home page', async ({ page }) => {
-      await expect(page.locator('.product-list, .products, [data-testid="product-list"]')).toBeVisible();
+      await expect(page.locator('.product-list, .products')).toBeVisible();
     });
 
     test('should display individual product cards', async ({ page }) => {
-      const productCards = page.locator('.product-card, .product, [data-testid="product-card"]');
+      const productCards = page.locator('.product-card, .product');
       await expect(productCards.first()).toBeVisible();
       
       // Check that products have essential elements
@@ -52,11 +52,10 @@ test.describe('Comprehensive Store Front Tests', () => {
     });
 
     test('should show product details when clicking on a product', async ({ page }) => {
-      const firstProduct = page.locator('.product-card, .product, [data-testid="product-card"]').first();
-      await firstProduct.click();
-      
+      await page.locator('.product-list .product-card h2').first().click()
+      await expect(page.url()).toContain('product')
       // Should navigate to product detail page or show modal
-      await expect(page.locator('.product-info, .product-details, [data-testid="product-details"]')).toBeVisible();
+      await expect(page.locator('.product-info, .product-details')).toBeVisible();
     });
 
     test('should display product information (name, price, description)', async ({ page }) => {
@@ -132,7 +131,8 @@ test.describe('Comprehensive Store Front Tests', () => {
       const initialCount = parseInt(initialCartText.match(/\d+/)?.[0] || '0');
 
       // Navigate to product details
-      await page.locator('.product-card, .product, [data-testid="product-card"]').first().click();
+      await page.locator('.product-list .product-card h2').first().click()
+      await expect(page.url()).toContain('product')
       
       // Add to cart from detail page
       await page.getByRole('button', { name: /Add to Cart/i }).click();

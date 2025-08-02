@@ -20,7 +20,7 @@ test.describe('Single Item Buyer Traffic Simulation', () => {
     await expect(page.locator('.product-list')).toBeVisible();
     
     // Find and click on the first product (simulating targeted selection)
-    const firstProduct = page.locator('.product-list .product-card').first();
+    const firstProduct = page.locator('.product-list .product-card h2').first();
     await expect(firstProduct).toBeVisible();
     
     // Read product details quickly
@@ -88,7 +88,7 @@ test.describe('Single Item Buyer Traffic Simulation', () => {
     await page.goto(testConfig.storeFrontUrl);
     
     // Browse multiple products to compare (realistic behavior)
-    const products = page.locator('.product-list .product-card');
+    const products = page.locator('.product-list .product-card h2');
     const productCount = await products.count();
     
     if (productCount > 1) {

@@ -18,10 +18,10 @@ test.describe('store-front tests', () => {
 
   test('can navigate to product details and add one to cart', async ({ page }) => {
     await page.goto(testConfig.storeFrontUrl);
-
-    await page.locator('.product-list .product-card').first().click()
+    await page.locator('.product-list .product-card h2').first().click()
     await expect(page.url()).toContain('product')
-    await expect(page.locator('.product-info h2')).toHaveText(`${testConfig.companyName} Catnip's Friend`);
+    const product_title = page.locator('.product-info h2');
+    await expect(product_title).toHaveText(`${testConfig.companyName} Catnip's Friend`);
 
     const cartLink = page.getByRole('link', { name: /Cart \(\d+\)/ });
     const initialCartCount = parseInt((await cartLink.textContent() || '').match(/\d+/)?.[0] || '0');
