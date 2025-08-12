@@ -78,6 +78,7 @@ jobs:
             org.opencontainers.image.revision=${{ steps.set-variables.outputs.VERSION }}
 
   create-unified-manifests:
+    needs: publish-container-image
     strategy:
       fail-fast: false
       matrix:
