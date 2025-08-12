@@ -3,6 +3,23 @@ variable "location" {
   type        = string
 }
 
+variable "subscription_id" {
+  description = "value of the subscription id"
+  type        = string
+}
+
+variable "resource_group" {
+  description = "value of the resource group name"
+  type        = string
+  default     = ""
+}
+
+variable "resource_group_location" {
+  description = "value of the resource group location if different than resource location"
+  type        = string
+  default     = ""
+}
+
 variable "environment" {
   description = "value of environment name which will be used to prefix resources"
   type        = string

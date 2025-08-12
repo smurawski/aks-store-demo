@@ -6,6 +6,8 @@ replicaCount: 1
 
 namespace: "dev"
 
+companyName: "Zava" # Can be Zava or Contoso
+
 useRabbitMQ: true # when true, local rabbitmq container will be used
 useMongoDB: true # when true, local mongodb container will be used
 
@@ -30,29 +32,18 @@ aiService:
 
 orderService:
   queueHost: "rabbitmq"
-  queuePort: "5672"
-  queueUsername: "username"
-  queuePassword: "password"
   queueName: "orders"
-  queueTransport: ""
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/order-service"
     tag: "latest"
 
 makelineService:
-  orderQueueUri: "amqp://rabbitmq:5672"
-  orderQueueUsername: "username"
-  orderQueuePassword: "password"
   orderQueueName: "orders"
   orderQueueHost: ""
-  orderDBApi: "mongodb"
   orderDBUri: "mongodb://mongodb:27017"
   orderDBListConnectionStringsUrl: ""
   orderDBName: "orderdb"
   orderDBCollectionName: "orders"
-  orderDBContainerName: "orders"
-  orderDBUsername: ""
-  orderDBPassword: ""
   image:
     repository: "ghcr.io/azure-samples/aks-store-demo/makeline-service"
     tag: "latest"

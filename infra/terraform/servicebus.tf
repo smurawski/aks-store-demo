@@ -5,7 +5,7 @@ module "sb" {
   version             = "0.4.0"
   name                = "sb-${local.name}"
   resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
+  location            = var.location
   sku                 = "Standard"
   local_auth_enabled  = false
 

@@ -17,6 +17,9 @@ spec:
       containers:
       - name: store-front
         image: {{ .Values.storeFront.image.repository }}:{{ .Values.storeFront.image.tag }}
+        env: 
+        - name: COMPANY_NAME
+          value: {{ .Values.companyName }}
         ports:
         - containerPort: 8080
           name: store-front

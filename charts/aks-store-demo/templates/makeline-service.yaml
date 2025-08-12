@@ -3,37 +3,15 @@ kind: ConfigMap
 metadata:
   name: makeline-service-configs
 data:  
-  {{- if eq .Values.useAzureAd false }}
-  ORDER_QUEUE_URI: "{{ .Values.makelineService.orderQueueUri }}"
-  ORDER_QUEUE_USERNAME: "{{ .Values.makelineService.orderQueueUsername }}"
-  ORDER_QUEUE_PASSWORD: "{{ .Values.makelineService.orderQueuePassword }}"
-  {{- else }}
-  USE_WORKLOAD_IDENTITY_AUTH: "true"
-  ORDER_QUEUE_HOSTNAME: "{{ .Values.makelineService.orderQueueHost }}"
-  {{- end }}
-  ORDER_QUEUE_NAME: "{{ .Values.makelineService.orderQueueName }}"
-  ORDER_DB_URI: "{{ .Values.makelineService.orderDBUri }}"
+  ORDER_DB_COLLECTION_NAME: "{{ .Values.makelineService.orderDBCollectionName }}"
   ORDER_DB_LIST_CONNECTION_STRING_URL: "{{ .Values.makelineService.orderDBListConnectionStringsUrl }}"
   ORDER_DB_NAME: "{{ .Values.makelineService.orderDBName }}"
-  {{- if eq .Values.makelineService.orderDBApi "cosmosdbsql" }}
-  ORDER_DB_API: "{{ .Values.makelineService.orderDBApi }}"
-  ORDER_DB_CONTAINER_NAME: "{{ .Values.makelineService.orderDBContainerName }}"
-  ORDER_DB_PARTITION_KEY: "storeId"
-  ORDER_DB_PARTITION_VALUE: "pets"
-  {{- else }}
-  ORDER_DB_COLLECTION_NAME: "{{ .Values.makelineService.orderDBCollectionName }}"
-  {{- end }}
+  ORDER_DB_URI: "{{ .Values.makelineService.orderDBUri }}"
+  ORDER_QUEUE_HOSTNAME: "{{ .Values.makelineService.orderQueueHost }}"
+  ORDER_QUEUE_NAME: "{{ .Values.makelineService.orderQueueName }}"
+  USE_WORKLOAD_IDENTITY_AUTH: "true"
+
 ---
-{{- if and (eq .Values.useAzureAd false) .Values.makelineService.orderDBUsername .Values.makelineService.orderDBPassword }}
-apiVersion: v1
-kind: Secret
-metadata:
-  name: makeline-service-secrets
-data:
-  ORDER_DB_USERNAME: "{{ .Values.makelineService.orderDBUsername | b64enc  }}"
-  ORDER_DB_PASSWORD: "{{ .Values.makelineService.orderDBPassword | b64enc  }}"
----
-{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -47,13 +25,9 @@ spec:
     metadata:
       labels:
         app: makeline-service
-        {{- if eq .Values.useAzureAd true }}
         azure.workload.identity/use: "true"
-        {{- end }}
     spec:
-      {{- if eq .Values.useAzureAd true }}
-      serviceAccount: {{ .Values.managedIdentityName }}
-      {{- end }}
+      serviceAccount: makeline-service
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
@@ -64,10 +38,6 @@ spec:
         envFrom:
         - configMapRef:
             name: makeline-service-configs
-        {{- if and (eq .Values.useAzureAd false) .Values.makelineService.orderDBUsername .Values.makelineService.orderDBPassword }}
-        - secretRef:
-            name: makeline-service-secrets
-        {{- end }}
         resources:
           requests:
             cpu: 1m

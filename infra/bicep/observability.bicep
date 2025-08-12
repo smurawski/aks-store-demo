@@ -2,7 +2,6 @@
 param nameSuffix string
 @description('The location of the resource.')
 param location string = resourceGroup().location
-param currentUserObjectId string
 param tags object
 
 resource logWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
@@ -47,15 +46,15 @@ resource grafanaDashboard 'Microsoft.Dashboard/grafana@2023-09-01' = {
   tags: tags
 }
 
-resource grafanaAdminRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(subscription().id, resourceGroup().id, currentUserObjectId, 'Grafana Admin')
-  scope: grafanaDashboard
-  properties: {
-    principalId: currentUserObjectId
-    principalType: 'User'
-    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', '22926164-76b3-42b3-bc55-97df8dab3e41')
-  }
-}
+// resource grafanaAdminRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+//   name: guid(subscription().id, resourceGroup().id, currentUserObjectId, 'Grafana Admin')
+//   scope: grafanaDashboard
+//   properties: {
+//     principalId: currentUserObjectId
+//     principalType: 'User'
+//     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', '22926164-76b3-42b3-bc55-97df8dab3e41')
+//   }
+// }
 
 output logsWorkspaceResourceId string = logWorkspace.id
 output metricsWorkspaceResourceId string = metricsWorkspace.id

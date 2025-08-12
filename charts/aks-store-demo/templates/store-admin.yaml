@@ -17,6 +17,9 @@ spec:
       containers:
       - name: store-admin
         image: {{ .Values.storeAdmin.image.repository }}:{{ .Values.storeAdmin.image.tag }}
+        env: 
+        - name: COMPANY_NAME
+          value: {{ .Values.companyName }}
         ports:
         - containerPort: 8081
           name: store-admin         # container images hosted on ghcr.io and will be removed in future releases

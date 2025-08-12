@@ -2,7 +2,7 @@ resource "azurerm_log_analytics_workspace" "example" {
   count               = local.deploy_observability_tools ? 1 : 0
   name                = "logs-${local.name}"
   resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
+  location            = var.location
   sku                 = "PerGB2018"
   retention_in_days   = 30
 }
@@ -11,14 +11,14 @@ resource "azurerm_monitor_workspace" "example" {
   count               = local.deploy_observability_tools ? 1 : 0
   name                = "metrics-${local.name}"
   resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
+  location            = var.location
 }
 
 resource "azurerm_dashboard_grafana" "example" {
   count                 = local.deploy_observability_tools ? 1 : 0
   name                  = "grafana-${substr(local.name, 0, 15)}"
   resource_group_name   = azurerm_resource_group.example.name
-  location              = azurerm_resource_group.example.location
+  location              = var.location
   grafana_major_version = "11"
 
   identity {
@@ -46,17 +46,17 @@ resource "azurerm_role_assignment" "example_rg_amg" {
 
 resource "azurerm_monitor_data_collection_endpoint" "example_msprom" {
   count               = local.deploy_observability_tools ? 1 : 0
-  name                = "MSProm-${azurerm_resource_group.example.location}-${module.aks.name}"
+  name                = "MSProm-${var.location}-${module.aks.name}"
   resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
+  location            = var.location
   kind                = "Linux"
 }
 
 resource "azurerm_monitor_data_collection_rule" "example_msprom" {
   count                       = local.deploy_observability_tools ? 1 : 0
-  name                        = "MSProm-${azurerm_resource_group.example.location}-${module.aks.name}"
+  name                        = "MSProm-${var.location}-${module.aks.name}"
   resource_group_name         = azurerm_resource_group.example.name
-  location                    = azurerm_resource_group.example.location
+  location                    = var.location
   data_collection_endpoint_id = azurerm_monitor_data_collection_endpoint.example_msprom[0].id
 
   data_sources {
@@ -96,7 +96,7 @@ resource "azurerm_monitor_alert_prometheus_rule_group" "example_node" {
   count               = local.deploy_observability_tools ? 1 : 0
   name                = "NodeRecordingRulesRuleGroup-${module.aks.name}"
   resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
+  location            = var.location
   cluster_name        = module.aks.name
   rule_group_enabled  = true
   interval            = "PT1M"
@@ -162,7 +162,7 @@ resource "azurerm_monitor_alert_prometheus_rule_group" "example_k8s" {
   count               = local.deploy_observability_tools ? 1 : 0
   name                = "KubernetesRecordingRulesRuleGroup-${module.aks.name}"
   resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
+  location            = var.location
   cluster_name        = module.aks.name
   rule_group_enabled  = true
   interval            = "PT1M"
@@ -279,9 +279,9 @@ resource "azurerm_monitor_alert_prometheus_rule_group" "example_k8s" {
 
 resource "azurerm_monitor_data_collection_rule" "example_msci" {
   count               = local.deploy_observability_tools ? 1 : 0
-  name                = "MSCI-${azurerm_resource_group.example.location}-${module.aks.name}"
+  name                = "MSCI-${var.location}-${module.aks.name}"
   resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
+  location            = var.location
   kind                = "Linux"
 
   data_sources {

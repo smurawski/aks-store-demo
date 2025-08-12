@@ -6,23 +6,8 @@ metadata:
 data:
   AZURE_OPENAI_ENDPOINT: "{{ .Values.aiService.openAiEndpoint }}"
   AZURE_OPENAI_DEPLOYMENT_NAME: "{{ .Values.aiService.modelDeploymentName }}"
-  {{- /*
-  Use Azure OpenAI or OpenAI  
-  */}}
-  {{- if eq .Values.aiService.useAzureOpenAi true }}
   USE_AZURE_OPENAI: "True"
-  {{- else }}
-  USE_AZURE_OPENAI: "False"
-  OPENAI_ORG_ID: "{{ .Values.aiService.openAiOrgId }}"
-  {{- end }}
-  {{- /*
-  Use Azure AD or OpenAI API Key  
-  */}}
-  {{- if eq .Values.useAzureAd true }}
   USE_AZURE_AD: "True"
-  {{- else }}
-  USE_AZURE_AD: "False"
-  {{- end }}
   {{- /*
   If DALL-E model is used, set the model name
   */}}
@@ -32,18 +17,6 @@ data:
   AZURE_OPENAI_API_VERSION: "{{ .Values.aiService.azureOpenAiApiVersion }}"
   {{- end }}
 ---
-{{- /*
-If Azure AD is not used, create a secret with OpenAI API Key
-*/}}
-{{- if eq .Values.useAzureAd false }}
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ai-service-secrets
-data:
-  OPENAI_API_KEY: "{{ .Values.aiService.openAiKey | b64enc }}"
----
-{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -57,19 +30,9 @@ spec:
     metadata:
       labels:
         app: ai-service
-        {{- /*
-        If Azure AD is used, set the label to use workload identity
-        */}}
-        {{- if eq .Values.useAzureAd true }}
         azure.workload.identity/use: "true"
-        {{- end }}
     spec:
-      {{- /*
-      If Azure AD is used, use the service account
-      */}}
-      {{- if eq .Values.useAzureAd true }}
-      serviceAccount: {{ .Values.managedIdentityName }}
-      {{- end }}
+      serviceAccount: ai-service
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
@@ -80,10 +43,6 @@ spec:
         envFrom:
         - configMapRef:
             name: ai-service-configs
-        {{- if eq .Values.useAzureAd false }}
-        - secretRef:
-            name: ai-service-secrets
-        {{- end }}
         resources:
           requests:
             cpu: 20m

@@ -5,9 +5,8 @@ param vmSku string
 param deployAcr bool
 param logsWorkspaceResourceId string
 param metricsWorkspaceResourceId string
-param currentUserObjectId string
-param currentIpAddress string
 param configureMonitorSettings bool = false
+param aksAvailabilityZones array
 param tags object
 
 // https://github.com/Azure/bicep-registry-modules/tree/main/avm/res/container-service/managed-cluster
@@ -21,6 +20,7 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.8.3
         mode: 'System'
         name: 'system'
         vmSize: vmSku
+        availabilityZones: aksAvailabilityZones
       }
     ]
     networkPlugin: 'azure'
@@ -44,16 +44,8 @@ module managedCluster 'br/public:avm/res/container-service/managed-cluster:0.8.3
       systemAssigned: true
     }
     publicNetworkAccess: 'Enabled'
-    authorizedIPRanges: [
-      currentIpAddress
-    ]
-    roleAssignments: [
-      {
-        principalId: currentUserObjectId
-        roleDefinitionIdOrName: 'Azure Kubernetes Service RBAC Cluster Admin'
-        principalType: 'User'
-      }
-    ]
+    authorizedIPRanges: []
+    roleAssignments: []
     maintenanceConfigurations: [
       {
         maintenanceWindow: {
@@ -98,13 +90,6 @@ module registry 'br/public:avm/res/container-registry/registry:0.9.1' = if (depl
     acrSku: 'Premium'
     exportPolicyStatus: 'enabled'
     publicNetworkAccess: 'Enabled'
-    // networkRuleSetIpRules: [
-    //   {
-    //     value: currentIpAddress
-    //     action: 'Allow'
-    //   }
-    // ]
-    // networkRuleBypassOptions: 'AzureServices'
     roleAssignments: [
       {
         principalId: managedCluster.outputs.?kubeletIdentityObjectId!

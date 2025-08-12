@@ -5,7 +5,7 @@ module "acr" {
   version             = "0.4.0"
   name                = "acr${local.name}"
   resource_group_name = azurerm_resource_group.example.name
-  location            = azurerm_resource_group.example.location
+  location            = var.location
 }
 
 // https://github.com/Azure/terraform-azurerm-avm-res-containerservice-managedcluster/
@@ -14,7 +14,7 @@ module "aks" {
   version                   = "0.1.7"
   name                      = "aks-${local.name}"
   resource_group_name       = azurerm_resource_group.example.name
-  location                  = azurerm_resource_group.example.location
+  location                  = var.location
   node_os_channel_upgrade   = "SecurityPatch"
   oidc_issuer_enabled       = true
   workload_identity_enabled = true
