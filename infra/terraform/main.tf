@@ -83,6 +83,11 @@ locals {
 resource "azurerm_resource_group" "example" {
   name     = local.resource_group_name
   location = local.resource_group_location
+  
+  lifecycle {
+    ignore_changes = [tags]
+  }
+
 }
 
 resource "azuread_group" "example" {

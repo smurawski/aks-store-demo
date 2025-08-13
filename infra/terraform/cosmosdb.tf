@@ -5,7 +5,7 @@ module "db" {
   version                       = "0.7.0"
   name                          = "db-${local.name}"
   resource_group_name           = azurerm_resource_group.example.name
-  location                      = azurerm_resource_group.example.location
+  location                      = var.location
   minimal_tls_version           = "Tls12"
   public_network_access_enabled = true
   # network_acl_bypass_for_azure_services = true
