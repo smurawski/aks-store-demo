@@ -13,6 +13,7 @@ services:
     docker:
       context: .
       path: Dockerfile
+      remoteBuild: true
     host: aks
     k8s:
       namespace: pets
@@ -44,6 +45,7 @@ services:
     docker:
       context: .
       path: Dockerfile
+      remoteBuild: true
     host: aks
     k8s:
       namespace: pets
@@ -72,6 +74,7 @@ services:
     docker:
       context: .
       path: Dockerfile
+      remoteBuild: true
     host: aks
     k8s:
       namespace: pets
@@ -103,6 +106,7 @@ services:
     docker:
       context: .
       path: Dockerfile
+      remoteBuild: true
     host: aks
     k8s:
       namespace: pets
@@ -137,6 +141,7 @@ services:
     docker:
       context: .
       path: Dockerfile
+      remoteBuild: true
     host: aks
     k8s:
       namespace: pets
@@ -164,6 +169,7 @@ services:
     docker:
       context: .
       path: Dockerfile
+      remoteBuild: true
     host: aks
     k8s:
       namespace: pets
