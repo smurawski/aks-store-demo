@@ -3,6 +3,16 @@ variable "location" {
   type        = string
 }
 
+variable "resource_group" {
+  description = "value of the resource group name"
+  type        = string
+}
+
+variable "resource_group_location" {
+  description = "value of the resource group location if different than resource location"
+  type        = string
+}
+
 variable "environment" {
   description = "value of environment name which will be used to prefix resources"
   type        = string

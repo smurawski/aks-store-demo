@@ -67,6 +67,8 @@ data "http" "current_ip" {
 
 locals {
   name                            = "${var.environment}${random_pet.example.id}${random_integer.example.result}"
+  resource_group_name             = var.resource_group != "" ? var.resource_group : "rg-${local.name}"
+  resource_group_location         = var.resource_group_location != "" ? var.resource_group_location : var.location
   aks_node_pool_vm_size           = var.aks_node_pool_vm_size != "" ? var.aks_node_pool_vm_size : "Standard_DS2_v2"
   deploy_azure_cosmosdb           = var.deploy_azure_cosmosdb == "true" ? true : false
   default_cosmosdb_account_kind   = "GlobalDocumentDB"
@@ -79,8 +81,8 @@ locals {
 }
 
 resource "azurerm_resource_group" "example" {
-  name     = "rg-${local.name}"
-  location = var.location
+  name     = local.resource_group_name
+  location = local.resource_group_location
 }
 
 resource "azuread_group" "example" {
