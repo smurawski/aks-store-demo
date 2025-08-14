@@ -72,6 +72,7 @@ jobs:
           echo "IMAGE=${{ matrix.apps }}" >> "$GITHUB_OUTPUT"
           echo "VERSION=$(echo ${GITHUB_REF#refs/tags/})" >> "$GITHUB_OUTPUT"
           echo "CREATED=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+          echo "PLATFORM_TAG=$(echo ${{ matrix.platform }} | tr '/' '-')" >> "$GITHUB_OUTPUT"
 
       - name: Env variable output
         id: test-variables
@@ -80,6 +81,7 @@ jobs:
           echo ${{ steps.set-variables.outputs.IMAGE }}
           echo ${{ steps.set-variables.outputs.VERSION }}
           echo ${{ steps.set-variables.outputs.CREATED }}
+          echo ${{ steps.set-variables.outputs.PLATFORM_TAG }}
 
       - name: Checkout code
         uses: actions/checkout@v2
@@ -104,8 +106,8 @@ jobs:
             APP_VERSION=${{ steps.set-variables.outputs.VERSION }}
           push: true
           tags: |
-            ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:${{ matrix.platform }}
-            ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:${{ steps.set-variables.outputs.VERSION }}
+            ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:${{ steps.set-variables.outputs.PLATFORM_TAG }}
+            ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:${{ steps.set-variables.outputs.VERSION }}-${{ steps.set-variables.outputs.PLATFORM_TAG }}
           labels: |
             org.opencontainers.image.source=${{ github.repositoryUrl }}
             org.opencontainers.image.created=${{ steps.set-variables.outputs.CREATED }}
@@ -155,8 +157,8 @@ jobs:
       - name: Create unified manifests
         run: |
           docker manifest create ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:latest \
-            ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:linux/amd64 \
-            ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:linux/arm64
+            ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:linux-amd64 \
+            ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:linux-arm64
           docker manifest push ${{ steps.set-variables.outputs.REPOSITORY }}/${{ steps.set-variables.outputs.IMAGE }}:latest
 
 
