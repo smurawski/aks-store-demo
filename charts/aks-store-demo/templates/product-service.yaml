@@ -22,6 +22,8 @@ spec:
         env: 
         - name: AI_SERVICE_URL
           value: "http://ai-service:5001/"
+        - name: COMPANY_NAME
+          value: {{ .Values.companyName }}
         resources:
           requests:
             cpu: 1m

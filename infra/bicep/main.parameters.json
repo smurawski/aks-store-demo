@@ -2,47 +2,44 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "currentUserObjectId": {
-      "value": "${CURRENT_USER_OBJECT_ID}"
-    },
-    "currentIpAddress": {
-      "value": "${CURRENT_IP_ADDRESS}"
+    "rgName": {
+      "value": "${AZURE_RESOURCE_GROUP}"
     },
     "appEnvironment": {
-      "value": "${AZURE_ENV_NAME}"
+      "value": "aitour"
     },
     "location": {
-      "value": "${AZURE_LOCATION}"
+      "value": "eastus2"
     },
     "aksNodePoolVMSize": {
       "value": "${AKS_NODE_POOL_VM_SIZE}"
     },
     "deployAzureContainerRegistry": {
-      "value": "${DEPLOY_AZURE_CONTAINER_REGISTRY=false}"
+      "value": "false"
     },
     "deployAzureServiceBus": {
-      "value": "${DEPLOY_AZURE_SERVICE_BUS=false}"
+      "value": "true"
     },
     "deployObservabilityTools": {
-      "value": "${DEPLOY_OBSERVABILITY_TOOLS=false}"
+      "value": "false"
     },
     "deployAzureCosmosDB": {
-      "value": "${DEPLOY_AZURE_COSMOSDB=false}"
+      "value": "true"
     },
     "cosmosDBAccountKind": {
-      "value": "${AZURE_COSMOSDB_ACCOUNT_KIND=GlobalDocumentDB}"
+      "value": "MongoDB"
     },
     "deployAzureOpenAI": {
-      "value": "${DEPLOY_AZURE_OPENAI=false}"
+      "value": "true"
     },
     "azureOpenAILocation": {
-      "value": "${AZURE_OPENAI_LOCATION}"
+      "value": "swedencentral"
     },
     "deployImageGenerationModel": {
-      "value": "${DEPLOY_AZURE_OPENAI_DALL_E_MODEL=false}"
+      "value": "false"
     },
     "source_registry": {
-      "value": "${SOURCE_REGISTRY}"
+      "value": "ghcr.io/smurawski/aks-store-demo"
     }
   }
 }

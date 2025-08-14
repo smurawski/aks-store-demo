@@ -1,9 +1,7 @@
 @minLength(3)
 param nameSuffix string
 param location string
-param currentUserObjectId string
-param currentIpAddress string
-param servicePrincipalId string
+param servicePrincipalId string = ''
 param modelDeployments array = []
 param tags object
 
@@ -31,30 +29,12 @@ module cognitiveServicesAccount 'br/public:avm/res/cognitive-services/account:0.
       }
     ]
     disableLocalAuth: true
-    // networkAcls: {
-    //   ipRules: [
-    //     {
-    //       action: 'Allow'
-    //       value: currentIpAddress
-    //     }
-    //   ]
-    //   defaultAction: 'Deny'
-    //   bypass: 'AzureServices'
-    // }
     roleAssignments: [
-      {
-        principalId: currentUserObjectId
-        roleDefinitionIdOrName: 'Cognitive Services OpenAI User'
-        principalType: 'User'
-      }
-      {
-        principalId: servicePrincipalId
-        roleDefinitionIdOrName: 'Cognitive Services OpenAI User'
-        principalType: 'ServicePrincipal'
-      }
+
     ]
     tags: tags
   }
 }
 
 output endpoint string = cognitiveServicesAccount.outputs.endpoint
+output id string = cognitiveServicesAccount.outputs.resourceId
