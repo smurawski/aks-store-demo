@@ -13,20 +13,54 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        apps: [
-          ai-service,
-          makeline-service,
-          order-service,
-          product-service,
-          store-admin,
-          store-front,
-          virtual-customer,
-          virtual-worker
-        ]
         include:
-          - platform: linux/amd64
+          - apps: ai-service
+            platform: linux/amd64
             runner: ubuntu-latest
-          - platform: linux/arm64
+          - apps: ai-service
+            platform: linux/arm64
+            runner: ubuntu-latest-arm
+          - apps: makeline-service
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - apps: makeline-service
+            platform: linux/arm64
+            runner: ubuntu-latest-arm
+          - apps: order-service
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - apps: order-service
+            platform: linux/arm64
+            runner: ubuntu-latest-arm
+          - apps: product-service
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - apps: product-service
+            platform: linux/arm64
+            runner: ubuntu-latest-arm
+          - apps: store-admin
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - apps: store-admin
+            platform: linux/arm64
+            runner: ubuntu-latest-arm
+          - apps: store-front
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - apps: store-front
+            platform: linux/arm64
+            runner: ubuntu-latest-arm
+          - apps: virtual-customer
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - apps: virtual-customer
+            platform: linux/arm64
+            runner: ubuntu-latest-arm
+          - apps: virtual-worker
+            platform: linux/amd64
+            runner: ubuntu-latest
+          - apps: virtual-worker
+            platform: linux/arm64
             runner: ubuntu-latest-arm
     runs-on: ${{ matrix.runner }}
 
