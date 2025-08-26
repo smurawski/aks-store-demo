@@ -40,6 +40,9 @@
     },
     "aksNodePoolOverride": {
       "value": "${AKS_NODE_POOL_OVERRIDE}"
+    },
+    "aksAvailabilityZones": {
+      "value": "${AKS_AVAILABILITY_ZONES}"
     }
   }
 }

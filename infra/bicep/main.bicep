@@ -62,7 +62,7 @@ param imageGenerationModelCapacity int = 1
 param sourceRegistry string = 'ghcr.io/azure-samples'
 
 @description('value of the AKS availability zones to use')
-param aksAvailabilityZones array = [1, 2, 3]
+param aksAvailabilityZones string = '1, 2, 3'
 
 @description('value of the AKS node pool override settings ')
 param aksNodePoolOverride object = {}
@@ -78,7 +78,7 @@ var name = '${appEnvironment}${take(uniqueString(resourceGroup().id, appEnvironm
 
 var isOverrideEmpty = empty(aksNodePoolOverride)
 var nodeSku = isOverrideEmpty ? aksNodePoolVMSize : aksNodePoolOverride[location].sku
-var zones = isOverrideEmpty ? aksAvailabilityZones : aksNodePoolOverride[location].zones
+var zones = isOverrideEmpty ? map(split(aksAvailabilityZones, ','), item => int(trim(item))) : aksNodePoolOverride[location].zones
 
 
 module aks 'kubernetes.bicep' = {

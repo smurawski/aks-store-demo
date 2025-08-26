@@ -29,6 +29,7 @@ module cognitiveServicesAccount 'br/public:avm/res/cognitive-services/account:0.
       }
     ]
     disableLocalAuth: true
+    publicNetworkAccess: 'Enabled'
     roleAssignments: [
 
     ]
