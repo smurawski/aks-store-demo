@@ -36,10 +36,7 @@
       "value": "${DEPLOY_AZURE_OPENAI_DALL_E_MODEL}"
     },
     "sourceRegistry": {
-      "value": "ghcr.io/smurawski"
-    },
-    "aksNodePoolOverride": {
-      "value": "${AKS_NODE_POOL_OVERRIDE}"
+      "value": "${SOURCE_REGISTRY}"
     },
     "aksAvailabilityZones": {
       "value": "${AKS_AVAILABILITY_ZONES}"

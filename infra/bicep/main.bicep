@@ -76,7 +76,7 @@ param tags object = {
 // this is used to ensure that each resource name is unique
 var name = '${appEnvironment}${take(uniqueString(resourceGroup().id, appEnvironment), 4)}'
 
-var aksNodePoolOverrideObject = json(aksNodePoolOverride)
+var aksNodePoolOverrideObject = !empty(aksNodePoolOverride) ? json(aksNodePoolOverride) : {}
 var isOverrideEmpty = empty(aksNodePoolOverride) || !contains(aksNodePoolOverrideObject, location)
 var isNodeSkuOverrideEmpty = isOverrideEmpty ? true : !contains(aksNodePoolOverrideObject[location], 'sku')
 var nodeSku = isNodeSkuOverrideEmpty ? aksNodePoolVMSize : aksNodePoolOverrideObject[location].sku
