@@ -65,7 +65,7 @@ param sourceRegistry string = 'ghcr.io/azure-samples'
 param aksAvailabilityZones string = '1, 2, 3'
 
 @description('value of the AKS node pool override settings ')
-param aksNodePoolOverride object = {}
+param aksNodePoolOverride string = ''
 
 @description('value of tags to apply to resources')
 param tags object = {
@@ -76,9 +76,13 @@ param tags object = {
 // this is used to ensure that each resource name is unique
 var name = '${appEnvironment}${take(uniqueString(resourceGroup().id, appEnvironment), 4)}'
 
-var isOverrideEmpty = empty(aksNodePoolOverride)
-var nodeSku = isOverrideEmpty ? aksNodePoolVMSize : aksNodePoolOverride[location].sku
-var zones = isOverrideEmpty ? map(split(aksAvailabilityZones, ','), item => int(trim(item))) : aksNodePoolOverride[location].zones
+var aksNodePoolOverrideObject = json(aksNodePoolOverride)
+var isOverrideEmpty = empty(aksNodePoolOverride) || !contains(aksNodePoolOverrideObject, location)
+var isNodeSkuOverrideEmpty = isOverrideEmpty ? true : !contains(aksNodePoolOverrideObject[location], 'sku')
+var nodeSku = isNodeSkuOverrideEmpty ? aksNodePoolVMSize : aksNodePoolOverrideObject[location].sku
+var isNodeZonesOverrideEmpty = isOverrideEmpty ? true : !contains(aksNodePoolOverrideObject[location], 'zones')
+var overrideZones = !isNodeZonesOverrideEmpty ? map(aksNodePoolOverrideObject[location].zones, item => int(trim(item))) : []
+var zones = isNodeZonesOverrideEmpty ? map(split(aksAvailabilityZones, ','), item => int(trim(item))) : overrideZones
 
 
 module aks 'kubernetes.bicep' = {
