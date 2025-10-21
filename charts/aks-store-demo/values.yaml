@@ -27,14 +27,14 @@ aiService:
   openAiDalleModelName: ""
   azureOpenAiApiVersion: "2024-02-15-preview"
   image:
-    repository: "ghcr.io/azure-samples/aks-store-demo/ai-service"
+    repository: "ghcr.io/usepowershell/aks-store-demo/ai-service"
     tag: "latest"
 
 orderService:
   queueHost: "rabbitmq"
   queueName: "orders"
   image:
-    repository: "ghcr.io/azure-samples/aks-store-demo/order-service"
+    repository: "ghcr.io/usepowershell/aks-store-demo/order-service"
     tag: "latest"
 
 makelineService:
@@ -45,37 +45,37 @@ makelineService:
   orderDBName: "orderdb"
   orderDBCollectionName: "orders"
   image:
-    repository: "ghcr.io/azure-samples/aks-store-demo/makeline-service"
+    repository: "ghcr.io/usepowershell/aks-store-demo/makeline-service"
     tag: "latest"
 
 productService:
   image:
-    repository: "ghcr.io/azure-samples/aks-store-demo/product-service"
+    repository: "ghcr.io/usepowershell/aks-store-demo/product-service"
     tag: "latest"
 
 storeAdmin:
   image:
-    repository: "ghcr.io/azure-samples/aks-store-demo/store-admin"
+    repository: "ghcr.io/usepowershell/aks-store-demo/store-admin"
     tag: "latest"
   serviceType: LoadBalancer
 
 storeFront:
   image:
-    repository: "ghcr.io/azure-samples/aks-store-demo/store-front"
+    repository: "ghcr.io/usepowershell/aks-store-demo/store-front"
     tag: "latest"
   serviceType: LoadBalancer
 
 virtualCustomer:
   create: true
   image:
-    repository: "ghcr.io/azure-samples/aks-store-demo/virtual-customer"
+    repository: "ghcr.io/usepowershell/aks-store-demo/virtual-customer"
     tag: "latest"
   ordersPerHour: 20
 
 virtualWorker:
   create: true
   image:
-    repository: "ghcr.io/azure-samples/aks-store-demo/virtual-worker"
+    repository: "ghcr.io/usepowershell/aks-store-demo/virtual-worker"
     tag: "latest"
   ordersPerHour: 10
 
