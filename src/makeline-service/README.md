@@ -217,7 +217,7 @@ export ORDER_DB_PARTITION_VALUE="pets"
 # set the following environment variables
 export USE_WORKLOAD_IDENTITY_AUTH=true
 export ORDER_DB_API=mongodb
-export ORDER_DB_LIST_CONNECTION_STRING_URL=https://management.azure.com$(az cosmosdb show -g $RGNAME -n $COSMOSDBNAME --query id -otsv)/listConnectionStrings?api-version=2021-04-15
+export ORDER_DB_URI="mongodb+srv://$COSMOSDBNAME.mongocluster.cosmos.azure.com/?tls=true&authSource=\$external&authMechanism=MONGODB-OIDC&retrywrites=false&maxIdleTimeMS=120000"
 export ORDER_DB_NAME=orderdb
 export ORDER_DB_COLLECTION_NAME=orders
 

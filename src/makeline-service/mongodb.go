@@ -3,11 +3,8 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -20,7 +17,7 @@ type MongoDBOrderRepo struct {
 	db *mongo.Collection
 }
 
-func NewMongoDBOrderRepoWithManagedIdentity(listConnectionStringsUrl string, mongoDb string, mongoCollection string) (*MongoDBOrderRepo, error) {
+func NewMongoDBOrderRepoWithManagedIdentity(mongoUri string, mongoDb string, mongoCollection string) (*MongoDBOrderRepo, error) {
 	// create a context
 	ctx := context.Background()
 
@@ -31,9 +28,9 @@ func NewMongoDBOrderRepoWithManagedIdentity(listConnectionStringsUrl string, mon
 		return nil, err
 	}
 
-	// get an access token for the management API
+	// get an access token for Azure Cosmos DB
 	opts := policy.TokenRequestOptions{
-		Scopes: []string{"https://management.azure.com/.default"},
+		Scopes: []string{"https://cosmos.azure.com/.default"},
 	}
 	token, err := cred.GetToken(ctx, opts)
 	if err != nil {
@@ -41,66 +38,30 @@ func NewMongoDBOrderRepoWithManagedIdentity(listConnectionStringsUrl string, mon
 		return nil, err
 	}
 
-	// create a request to get the connection string
-	req, err := http.NewRequestWithContext(ctx, "POST", listConnectionStringsUrl, nil)
-	if err != nil {
-		log.Printf("failed to create request: %v\n", err)
-		return nil, err
-	}
-	req.Header.Add("Authorization", "Bearer "+token.Token)
-
-	// get the connection strings
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Printf("failed to get connection string: %v\n", err)
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	// make sure the response is good
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to retrieve connection strings: HTTP %d", resp.StatusCode)
+	if token.Token == "" {
+		return nil, fmt.Errorf("received empty token for mongodb managed identity authentication")
 	}
 
-	// read the response body
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("failed to read response body: %v\n", err)
-		return nil, err
-	}
-
-	// parse the response body
-	var responseData map[string]interface{}
-	if err := json.Unmarshal(body, &responseData); err != nil {
-		log.Printf("failed to parse response: %v\n", err)
-		return nil, err
-	}
-
-	// make sure the connectionStrings array is present
-	if responseData["connectionStrings"] == nil {
-		return nil, fmt.Errorf("connectionStrings not found in response")
-	}
-
-	// get the first connection string
-	connStrings, ok := responseData["connectionStrings"].([]interface{})
-	if !ok || len(connStrings) == 0 {
-		return nil, fmt.Errorf("connectionStrings is empty or not an array")
-	}
-
-	// make sure the first element is a connection string object
-	connStringObj, ok := connStrings[0].(map[string]interface{})
-	if !ok || connStringObj["connectionString"] == nil {
-		return nil, fmt.Errorf("connectionString not found in first element")
-	}
-
-	// get the connection string
-	connectionString, ok := connStringObj["connectionString"].(string)
-	if !ok {
-		return nil, fmt.Errorf("connectionString is not a string")
-	}
-
-	// create a mongo client with the connection string
-	var clientOptions *options.ClientOptions = options.Client().ApplyURI(connectionString)
+	// create a mongo client with the Azure Cosmos DB for MongoDB vCore URI and Entra token
+	var clientOptions *options.ClientOptions = options.Client().ApplyURI(mongoUri).
+		SetAuth(options.Credential{
+			AuthMechanism: "MONGODB-OIDC",
+			AuthSource:    "$external",
+			OIDCMachineCallback: func(ctx context.Context, _ *options.OIDCArgs) (*options.OIDCCredential, error) {
+				token, err := cred.GetToken(ctx, opts)
+				if err != nil {
+					log.Printf("failed to get token: %v\n", err)
+					return nil, err
+				}
+				if token.Token == "" {
+					return nil, fmt.Errorf("received empty token for mongodb managed identity authentication")
+				}
+				return &options.OIDCCredential{
+					AccessToken: token.Token,
+					ExpiresAt:   &token.ExpiresOn,
+				}, nil
+			},
+		})
 	mongoClient, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Printf("failed to connect to mongodb: %s", err)

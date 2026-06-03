@@ -227,8 +227,8 @@ func initDatabase(apiType string) (*OrderService, error) {
 
 		if useWorkloadIdentityAuth == "true" {
 			log.Printf("Authenticating with Workload Identity")
-			dbListConnStringsURL := getEnvVar("ORDER_DB_LIST_CONNECTION_STRING_URL")
-			mongoRepo, err := NewMongoDBOrderRepoWithManagedIdentity(dbListConnStringsURL, dbName, collectionName)
+			dbURI := getEnvVar("AZURE_COSMOS_RESOURCEENDPOINT", "ORDER_DB_URI")
+			mongoRepo, err := NewMongoDBOrderRepoWithManagedIdentity(dbURI, dbName, collectionName)
 			if err != nil {
 				return nil, err
 			}
